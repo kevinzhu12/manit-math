@@ -34,49 +34,107 @@ export default function Home() {
   const galleryItems = [
     {
       title: "Trefoil Knot Animation",
-      videoUrl: "/videos/trefoil_knot.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/trefoil_knot.mp4",
     },
     {
       title: "Sine & Cosine Waves",
-      videoUrl: "/videos/sin_cos_waves.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/sin_cos_waves.mp4",
     },
     {
       title: "Linear Regression",
-      videoUrl: "/videos/linear_regression_residuals.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/linear_regression_residuals.mp4",
     },
     {
       title: "Neural Network",
-      videoUrl: "/videos/neural_network.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/neural_network.mp4",
     },
     {
       title: "Mobius Strip",
-      videoUrl: "/videos/mobius_strip.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/mobius_strip.mp4",
     },
     {
       title: "Sound Frequencies",
-      videoUrl: "/videos/sound_frequencies.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/sound_frequencies.mp4",
     },
     {
       title: "Circle Fractal",
-      videoUrl: "/videos/circle_fractal.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/circle_fractal.mp4",
     },
     {
       title: "Spirals",
-      videoUrl: "/videos/spirals.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/spirals.mp4",
     },
     {
       title: "Graph with Nodes",
-      videoUrl: "/videos/graph_with_nodes.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/graph_with_nodes.mp4",
     },
     {
       title: "Smile",
-      videoUrl: "/videos/smiley_face.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/smiley_face.mp4",
     },
     {
       title: "Frown to Smile",
-      videoUrl: "/videos/frown_to_smile.mp4",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/frown_to_smile.mp4",
     },
   ];
+
+  // const galleryItems = [
+  //   {
+  //     title: "Trefoil Knot Animation",
+  //     videoUrl: "/videos/trefoil_knot.mp4",
+  //   },
+  //   {
+  //     title: "Sine & Cosine Waves",
+  //     videoUrl: "/videos/sin_cos_waves.mp4",
+  //   },
+  //   {
+  //     title: "Linear Regression",
+  //     videoUrl: "/videos/linear_regression_residuals.mp4",
+  //   },
+  //   {
+  //     title: "Neural Network",
+  //     videoUrl: "/videos/neural_network.mp4",
+  //   },
+  //   {
+  //     title: "Mobius Strip",
+  //     videoUrl: "/videos/mobius_strip.mp4",
+  //   },
+  //   {
+  //     title: "Sound Frequencies",
+  //     videoUrl: "/videos/sound_frequencies.mp4",
+  //   },
+  //   {
+  //     title: "Circle Fractal",
+  //     videoUrl: "/videos/circle_fractal.mp4",
+  //   },
+  //   {
+  //     title: "Spirals",
+  //     videoUrl: "/videos/spirals.mp4",
+  //   },
+  //   {
+  //     title: "Graph with Nodes",
+  //     videoUrl: "/videos/graph_with_nodes.mp4",
+  //   },
+  //   {
+  //     title: "Smile",
+  //     videoUrl: "/videos/smiley_face.mp4",
+  //   },
+  //   {
+  //     title: "Frown to Smile",
+  //     videoUrl: "/videos/frown_to_smile.mp4",
+  //   },
+  // ];
 
   // Cycle through loading messages
   useEffect(() => {
