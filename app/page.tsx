@@ -1,12 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 
+interface VideoResponse {
+  request_id?: string;
+  status?: string;
+  error?: string;
+}
+
 export default function Home() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoTitle, setVideoTitle] = useState<string>("");
-  const [videoExplanation, setVideoExplanation] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [useGemini, setUseGemini] = useState(false);
   const [renderQuality, setRenderQuality] = useState("480p");
@@ -148,10 +152,7 @@ export default function Home() {
   }, [isLoading]);
 
   // Function to rotate video indices
-  const rotateVideos = (
-    indices: number[],
-    direction: "left" | "middle" | "right"
-  ) => {
+  const rotateVideos = (indices: number[]) => {
     // Get all currently playing video indices from both sides
     const currentLeftIndices = new Set(leftVideoIndices);
     const currentMiddleIndices = new Set(middleVideoIndices);
@@ -185,11 +186,6 @@ export default function Home() {
     });
   };
 
-  // Function to check if a video is currently playing
-  const isVideoPlaying = (videoIndex: number) => {
-    return [...leftVideoIndices, ...rightVideoIndices].includes(videoIndex);
-  };
-
   // Update video indices with proper state updates
   const handleVideoEnd = (
     direction: "left" | "middle" | "right",
@@ -198,21 +194,21 @@ export default function Home() {
     if (direction === "left") {
       setLeftVideoIndices((prev) => {
         const newIndices = [...prev];
-        const [newIndex] = rotateVideos([prev[position]], direction);
+        const [newIndex] = rotateVideos([prev[position]]);
         newIndices[position] = newIndex;
         return newIndices;
       });
     } else if (direction === "middle") {
       setMiddleVideoIndices((prev) => {
         const newIndices = [...prev];
-        const [newIndex] = rotateVideos([prev[position]], direction);
+        const [newIndex] = rotateVideos([prev[position]]);
         newIndices[position] = newIndex;
         return newIndices;
       });
     } else {
       setRightVideoIndices((prev) => {
         const newIndices = [...prev];
-        const [newIndex] = rotateVideos([prev[position]], direction);
+        const [newIndex] = rotateVideos([prev[position]]);
         newIndices[position] = newIndex;
         return newIndices;
       });
@@ -221,54 +217,60 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setVideoTitle("");
-    setVideoExplanation("");
     setVideoUrl(null);
     setError(null);
     setIsLoading(true);
+
     try {
-      // const metadataResponse = await fetch(
-      //   "http://54.163.30.238:2000/generate/metadata",
-      //   {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({
-      //       prompt: inputText,
-      //     }),
-      //   }
-      // );
+      // Initial request to start video generation
+      const response = await fetch("http://54.166.84.241:2000/generate/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: inputText,
+          use_gemini: useGemini,
+          render_quality: renderQuality,
+          model: selectedModel,
+        }),
+      });
 
-      // const metadata = await metadataResponse.json();
-      // setVideoTitle(metadata.title);
-      // setVideoExplanation(metadata.explanation);
+      const data: VideoResponse = await response.json();
 
-      // Second API call to generate the video
-      const videoResponse = await fetch(
-        "http://107.21.164.116:2000/generate/video",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: inputText,
-            use_gemini: useGemini,
-            render_quality: renderQuality,
-            model: selectedModel,
-          }),
-        }
-      );
-
-      if (!videoResponse.ok) {
-        const error = await videoResponse.json();
-        throw new Error(error.detail || "Failed to generate video");
+      if (!data.request_id) {
+        throw new Error("No request ID received");
       }
 
-      const videoBlob = await videoResponse.blob();
-      const videoUrl = URL.createObjectURL(videoBlob);
-      setVideoUrl(videoUrl);
+      const pollVideo = async () => {
+        const videoResponse = await fetch(
+          `http://54.166.84.241:2000/video/${data.request_id}`
+        );
+
+        // Check content type before parsing
+        const contentType = videoResponse.headers.get("content-type");
+
+        if (contentType?.includes("application/json")) {
+          // It's JSON (probably an error or status message)
+          const videoData: VideoResponse = await videoResponse.json();
+          if (videoData.error) {
+            throw new Error(videoData.error);
+          }
+        } else if (contentType?.includes("video")) {
+          // It's a video file
+          const videoBlob = await videoResponse.blob();
+          const url = URL.createObjectURL(videoBlob);
+          setVideoUrl(url);
+          setIsLoading(false);
+          setInputText("");
+        } else {
+          throw new Error("Unexpected response type");
+        }
+      };
+
+      // Start polling
+      await pollVideo();
     } catch (error) {
       console.error("Error:", error);
       setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -283,7 +285,7 @@ export default function Home() {
   }, [videoUrl]);
 
   return (
-    <main className="min-h-screen bg-black flex flex-col items-center p-12 pt-12">
+    <main className="min-h-screen bg-black flex flex-col items-center p-12 pt-8 relative">
       {/* Gallery Button */}
       <div className="fixed top-6 left-6 z-50">
         <button
@@ -332,12 +334,13 @@ export default function Home() {
               d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2 12h3m14 0h3M12 2v3m0 14v3"
             />
           </svg>
+          Background
         </button>
       </div>
 
       {/* Left Background Videos */}
       {showBackground && (
-        <div className="fixed left-4 top-4 h-full w-[350px] overflow-hidden">
+        <div className="fixed left-4 top-4 h-full w-[350px] overflow-hidden hidden lg:block">
           <div className="relative h-full">
             {leftVideoIndices.map((videoIndex, index) => (
               <div
@@ -385,7 +388,7 @@ export default function Home() {
 
       {/* Right Background Videos */}
       {showBackground && (
-        <div className="fixed right-4 top-8 h-full w-[350px] overflow-hidden">
+        <div className="fixed right-4 top-8 h-full w-[350px] overflow-hidden hidden lg:block">
           <div className="relative h-full">
             {rightVideoIndices.map((videoIndex, index) => (
               <div
@@ -670,20 +673,31 @@ export default function Home() {
         </div>
       ) : (
         videoUrl && (
-          <div className="mt-4 w-full max-w-2xl">
-            <video
-              src={videoUrl}
-              controls
-              className="w-full rounded-xl mb-4 border border-white"
-              autoPlay
-            />
-            {/* <h3 className="text-white text-xl font-medium mb-3">
-              {videoTitle}
-            </h3>
-            <p className="text-gray-400 text-base mt-2">{videoExplanation}</p> */}
+          <div className="mt-4 w-full max-w-2xl relative z-10">
+            <div className="bg-black rounded-xl p-1">
+              <video
+                src={videoUrl}
+                controls
+                className="w-full rounded-xl border border-white"
+                autoPlay
+              />
+            </div>
           </div>
         )
       )}
+
+      {/* Footer */}
+      <div className="absolute bottom-6 text-gray-400 text-sm">
+        Built by{" "}
+        <a
+          href="https://kevinbzhu.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-400 no-underline border-b border-gray-400 hover:text-white hover:border-white transition-all duration-200"
+        >
+          Kevin Zhu
+        </a>
+      </div>
     </main>
   );
 }
