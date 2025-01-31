@@ -223,19 +223,16 @@ export default function Home() {
 
     try {
       // Initial request to start video generation
-      const response = await fetch(
-        "https://54.166.84.241:2000/generate/video",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: inputText,
-            use_gemini: useGemini,
-            render_quality: renderQuality,
-            model: selectedModel,
-          }),
-        }
-      );
+      const response = await fetch("https://107.21.179.183/generate/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: inputText,
+          use_gemini: useGemini,
+          render_quality: renderQuality,
+          model: selectedModel,
+        }),
+      });
 
       const data: VideoResponse = await response.json();
 
@@ -245,7 +242,7 @@ export default function Home() {
 
       const pollVideo = async () => {
         const videoResponse = await fetch(
-          `http://54.166.84.241:2000/video/${data.request_id}`
+          `http://107.21.179.183/video/${data.request_id}`
         );
 
         // Check content type before parsing
