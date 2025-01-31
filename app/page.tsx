@@ -223,7 +223,7 @@ export default function Home() {
 
     try {
       // Initial request to start video generation
-      const response = await fetch("https://107.21.179.183/generate/video", {
+      const response = await fetch("http://107.21.179.183/generate/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
