@@ -223,7 +223,7 @@ export default function Home() {
 
     try {
       // Initial request to start video generation
-      const response = await fetch("http://107.21.179.183/generate/video", {
+      const response = await fetch("http://manitmathapi.xyz/generate/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -242,7 +242,7 @@ export default function Home() {
 
       const pollVideo = async () => {
         const videoResponse = await fetch(
-          `http://107.21.179.183/video/${data.request_id}`
+          `http://manitmathapi.xyz/video/${data.request_id}`
         );
 
         // Check content type before parsing
