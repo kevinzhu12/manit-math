@@ -91,6 +91,11 @@ export default function Home() {
       videoUrl:
         "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/frown_to_smile.mp4",
     },
+    {
+      title: "Square to Cube",
+      videoUrl:
+        "https://kevin-manim-gallery-bucket.s3.us-east-1.amazonaws.com/square_to_cube.mp4",
+    },
   ];
 
   // const galleryItems = [
@@ -328,7 +333,7 @@ export default function Home() {
               d="M4 6h16M4 12h16m-7 6h7"
             />
           </svg>
-          Gallery
+          <span className="hidden sm:inline">Gallery</span>
         </button>
       </div>
 
@@ -355,7 +360,7 @@ export default function Home() {
               d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2 12h3m14 0h3M12 2v3m0 14v3"
             />
           </svg>
-          Background
+          <span className="hidden sm:inline">Background</span>
         </button>
       </div>
 
@@ -568,7 +573,7 @@ export default function Home() {
                           <div className="bg-[#2A2A2A] text-gray-200 text-xs p-2 rounded-lg shadow-lg">
                             {/* Better animation but slower rendering */}
                             Uses Gemini-2.0 Flash Experimental to evaluate video
-                            and improve animation
+                            and improve animation - much slower rendering
                           </div>
                         </div>
                       </div>
@@ -600,7 +605,7 @@ export default function Home() {
                           </div>
                         </div>
                       </div>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-gray-400 text-sm hidden sm:inline">
                         Render Quality
                       </span>
                     </div>
@@ -625,11 +630,16 @@ export default function Home() {
                                       transition-opacity duration-200 pointer-events-none z-50"
                         >
                           <div className="bg-[#2A2A2A] text-gray-200 text-xs p-2 rounded-lg shadow-lg">
-                            Choose between different model versions
+                            - DeepSeek-V3 is faster and optimal for most use
+                            cases
+                            <br />- DeepSeek-R1 is better for complex animations
+                            but slower rendering
                           </div>
                         </div>
                       </div>
-                      <span className="text-gray-400 text-sm">Model</span>
+                      <span className="text-gray-400 text-sm hidden sm:inline">
+                        Model
+                      </span>
                     </div>
                   </div>
 
@@ -642,7 +652,17 @@ export default function Home() {
                              flex items-center gap-2
                              bg-[#60A5FA]"
                   >
-                    {isLoading ? <>Processing...</> : "Generate ✨"}
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="hidden sm:inline">Processing</span>
+                        <span className="inline sm:hidden">...</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <span className="hidden sm:inline">Generate</span>
+                        <span>✨</span>
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
