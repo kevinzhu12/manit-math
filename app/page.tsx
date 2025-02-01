@@ -240,33 +240,54 @@ export default function Home() {
         throw new Error("No request ID received");
       }
 
+      // Modified polling function with retry logic
       const pollVideo = async () => {
-        const videoResponse = await fetch(
-          `https://manitmathapi.xyz/video/${data.request_id}`
-        );
+        const maxAttempts = 30; // Maximum number of polling attempts
+        const pollInterval = 4000; // Time between polls in milliseconds
+        let attempts = 0;
 
-        // Check content type before parsing
-        const contentType = videoResponse.headers.get("content-type");
+        while (attempts < maxAttempts) {
+          try {
+            const videoResponse = await fetch(
+              `https://manitmathapi.xyz/video/${data.request_id}`
+            );
 
-        if (contentType?.includes("application/json")) {
-          // It's JSON (probably an error or status message)
-          const videoData: VideoResponse = await videoResponse.json();
-          if (videoData.error) {
-            throw new Error(videoData.error);
+            const contentType = videoResponse.headers.get("content-type");
+
+            if (contentType?.includes("application/json")) {
+              // Check status - if still processing, continue polling
+              const videoData: VideoResponse = await videoResponse.json();
+              if (videoData.error) {
+                throw new Error(videoData.error);
+              }
+              // If status indicates processing, wait and try again
+              if (videoData.status === "processing") {
+                await new Promise((resolve) =>
+                  setTimeout(resolve, pollInterval)
+                );
+                attempts++;
+                continue;
+              }
+            } else if (contentType?.includes("video")) {
+              // Video is ready
+              const videoBlob = await videoResponse.blob();
+              const url = URL.createObjectURL(videoBlob);
+              setVideoUrl(url);
+              setIsLoading(false);
+              setInputText("");
+              return;
+            }
+          } catch (error) {
+            console.error("Polling attempt failed:", error);
+            attempts++;
+            await new Promise((resolve) => setTimeout(resolve, pollInterval));
           }
-        } else if (contentType?.includes("video")) {
-          // It's a video file
-          const videoBlob = await videoResponse.blob();
-          const url = URL.createObjectURL(videoBlob);
-          setVideoUrl(url);
-          setIsLoading(false);
-          setInputText("");
-        } else {
-          throw new Error("Unexpected response type");
         }
+
+        // If we exit the loop without returning, we've exceeded max attempts
+        throw new Error("Video generation timed out");
       };
 
-      // Start polling
       await pollVideo();
     } catch (error) {
       console.error("Error:", error);
